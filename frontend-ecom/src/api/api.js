@@ -1,0 +1,28 @@
+import axios from "axios";
+
+const api = axios.create({
+    baseURL: `${import.meta.env.VITE_BACK_END_URL}/api`,
+    headers: {
+        "Content-Type": "application/json",
+    },
+    withCredentials: true,
+});
+
+api.interceptors.request.use(
+    (config) => {
+        const auth = localStorage.getItem("auth");
+        if (auth) {
+            const parsedAuth = JSON.parse(auth);
+            const token = parsedAuth.jwtToken || parsedAuth.jwt || parsedAuth.token;
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+export default api;

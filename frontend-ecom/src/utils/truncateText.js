@@ -1,0 +1,8 @@
+const truncateText = (text, charLimit) => {
+    if (text?.length > charLimit) {
+        return text.slice(0, charLimit) + "...";
+
+    }
+};
+
+export default truncateText;
