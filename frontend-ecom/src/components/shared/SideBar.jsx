@@ -1,11 +1,11 @@
 import React from 'react'
-import { FaTachometerAlt } from 'react-icons/fa';
+import { FaSadCry, FaTachometerAlt } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom'
 import { adminNavigation } from '../../utils';
 import classNames from 'classnames';
 
-const SideBar = ({isProfileLayout = false}) => {
+const SideBar = ({isProfileLayout = false, setSidebarOpen = () => {}}) => {
     const pathName = useLocation().pathname;
     const { user } = useSelector((state) => state.auth);
 
@@ -15,7 +15,7 @@ const SideBar = ({isProfileLayout = false}) => {
   return (
     <div className='flex grow flex-col gap-y-7 overflow-y-auto bg-custom-gradient px-6 pb-4'>
         <div className='flex h-16 shrink-0 gap-x-3 pt-2'>
-            <FaTachometerAlt className='h-8 w-8 text-indigo-500'/>
+            <FaSadCry className='h-8 w-8 text-indigo-500'/>
             <h1 className='text-white text-xl font-bold'>
                 Admin Panel
             </h1>
@@ -28,6 +28,7 @@ const SideBar = ({isProfileLayout = false}) => {
                             <li key={item.name}>
                                 <Link
                                     to={item.href}
+                                    onClick={() => setSidebarOpen(false)}
                                     className={classNames(
                                         pathName === item.href
                                         ? "bg-custom-blue text-white"
@@ -50,4 +51,4 @@ const SideBar = ({isProfileLayout = false}) => {
   )
 }
 
-export default SideBar
+export default SideBar;

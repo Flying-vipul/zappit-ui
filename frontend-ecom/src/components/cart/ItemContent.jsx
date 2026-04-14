@@ -38,6 +38,15 @@ const ItemContent = ({
     const dispatch = useDispatch();
     const { cart } = useSelector((state) => state.carts);
 
+    // Build the full image URL regardless of whether the backend stored an absolute or relative path
+    const getCleanImageUrl = (imgData) => {
+        const BASE = import.meta.env.VITE_BACK_END_URL || "http://localhost:8080";
+        if (!imgData) return `${BASE}/images/default.png`;
+        const filename = imgData.split('/').pop();
+        return `${BASE}/images/${filename}`;
+    };
+    const fullImageUrl = getCleanImageUrl(image);
+
     const removeFromCartHandler = () => {
         dispatch({ type: "REMOVE_FROM_CART", payload: productId });
         const updatedCart = cart.filter((item) => item.productId !== productId);
@@ -57,7 +66,7 @@ const ItemContent = ({
             <div className="w-full md:col-span-2 flex justify-start items-center gap-4">
                 <div className="w-24 h-24 shrink-0 bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center shadow-sm">
                     <ProductImage
-                        src={image}
+                        src={fullImageUrl}
                         alt={productName}
                         className="max-h-full max-w-full object-contain"
                     />
@@ -69,7 +78,7 @@ const ItemContent = ({
 
                     {/* Mobile Only: Show Price inline */}
                     <div className="md:hidden text-sm font-semibold text-slate-600 mt-1">
-                        Price: <span className="text-blue-600">${displayPrice.toFixed(2)}</span>
+                        Price: <span className="text-blue-600">₹{displayPrice.toFixed(2)}</span>
                     </div>
 
                     <button
@@ -83,7 +92,7 @@ const ItemContent = ({
 
             {/* ── Desktop Price ── */}
             <div className="hidden md:block justify-self-center text-base font-semibold text-slate-700">
-                ${displayPrice.toFixed(2)}
+                ₹{displayPrice.toFixed(2)}
             </div>
 
             {/* ── Quantity Controls ── */}
@@ -120,7 +129,7 @@ const ItemContent = ({
             <div className="w-full md:w-auto flex justify-between md:justify-center items-center mt-2 md:mt-0 pt-3 md:pt-0 border-t border-slate-200 md:border-none px-2 md:px-0">
                 <span className="md:hidden text-sm font-semibold text-slate-700">Total</span>
                 <div className="text-base md:text-lg font-bold text-slate-900 bg-slate-100 md:bg-transparent px-3 py-1 md:px-0 md:py-0 rounded-md">
-                    ${total}
+                    ₹{total}
                 </div>
             </div>
 

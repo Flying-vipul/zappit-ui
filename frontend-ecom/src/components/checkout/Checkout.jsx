@@ -171,7 +171,7 @@ const Checkout = () => {
                 {activeStep === 3 &&
                     <>
                         {paymentMethod === "Razorpay" ? (
-                            <RazorpayPayment cartTotal={totalPrice} addressId={selectedUserAddress?.id} />
+                            <RazorpayPayment cartTotal={totalPrice} addressId={selectedUserAddress?.addressId} />
                         ) : (
                             <PayPalPayment />
                         )}

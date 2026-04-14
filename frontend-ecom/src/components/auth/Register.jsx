@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
-import { AiOutlineLogin } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../shared/InputField';
 import { FaUserPlus } from 'react-icons/fa';
@@ -40,18 +39,29 @@ const Register = () => {
 
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex justify-center items-center">
-            <form className="sm:w-[450px] w-[350px] shadow-custom py-8 sm:px-8 px-4 rounded-md"
+        <div className="min-h-[calc(100vh-64px)] flex justify-center items-center relative overflow-hidden">
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-[#0a0a1a] dark:via-[#0f0c29] dark:to-[#1a1040]" />
+            <div className="absolute top-10 -right-20 w-80 h-80 bg-violet-300/20 dark:bg-violet-500/10 rounded-full blur-3xl animate-float" />
+            <div className="absolute bottom-10 -left-20 w-72 h-72 bg-indigo-300/20 dark:bg-indigo-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+
+            <form className="relative sm:w-[440px] w-[350px] bg-white/80 dark:bg-gray-900/60 backdrop-blur-xl
+                border border-gray-200/50 dark:border-gray-700/50
+                py-8 sm:px-8 px-5 rounded-2xl shadow-xl shadow-violet-500/5 dark:shadow-violet-500/10
+                animate-scale-in"
                 onSubmit={handleSubmit(registerHandler)}
             >
-                <div className="flex flex-col items-center justify-center">
-                    <FaUserPlus className="text-slate-800 text-5xl" />
-                    <h1 className="text-slate-800 text-center font-montserrat lg:text-3xl text-2xl font-bold">
-                        Register Here
+                <div className="flex flex-col items-center justify-center mb-6">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
+                        <FaUserPlus className="text-white text-xl" />
+                    </div>
+                    <h1 className="text-2xl font-extrabold gradient-text">
+                        Create Account
                     </h1>
+                    <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">Join Zappit today</p>
                 </div>
-                <hr className="mt-2 mb-5 text-black" />
-                <div className="flex flex-col gap-3">
+
+                <div className="flex flex-col gap-4">
                     <InputField
                         label="UserName"
                         required
@@ -97,22 +107,30 @@ const Register = () => {
                         register={register}
                         errors={errors}
                     />
-
-
                 </div>
 
                 <button
                     disabled={loader}
-                    className="bg-button-gradient flex gap-2 items-center justify-center font-semibold text-white w-full py-2 hover:text-slate-400 transition-colors duration-100 rounded-sm my-3 "
+                    className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500
+                        text-white font-semibold shadow-lg shadow-violet-500/30
+                        hover:from-violet-600 hover:to-fuchsia-600 hover:shadow-xl hover:shadow-violet-500/40
+                        transition-all duration-300 hover:-translate-y-0.5
+                        disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     type="submit"
                 >{loader ? (
-                    <>Loading...</>
+                    <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Creating account...
+                    </span>
                 ) : <>Register</>}
                 </button>
 
-                <p className="text-center text-sm text-slate-700 mt-6 ">
-                    Already have an account?
-                    <Link className="underline hover:text-black font-semibold"
+                <p className="text-center text-sm text-slate-500 dark:text-gray-400 mt-6">
+                    Already have an account?{" "}
+                    <Link className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors duration-200"
                         to="/login">
                         <span>Login</span></Link>
                 </p>

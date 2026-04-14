@@ -1,14 +1,18 @@
+// ✅ All imports MUST be at the top (ES Module rule)
 import { configureStore } from "@reduxjs/toolkit";
-import { productReducer } from './ProductReducer'; // or wherever your product logic is
+import { productReducer } from './ProductReducer';
 import { errorReducer } from './errorReducers';
 import { cartReducer } from "./cartReducer";
 import { authReducer } from "./authReducer";
 import paymentMethodReducer from "./paymentMethodReducer";
+import cartSliceReducer from "../../components/cart/cartSlice";
+import { adminReducer } from "./adminReducer";
+import { orderReducer } from "./orderReducer";
+import { sellerReducer } from "./sellerReducer";
 
 const user = localStorage.getItem("auth")
     ? JSON.parse(localStorage.getItem("auth"))
     : null;
-
 
 const cartItems = localStorage.getItem("cartItems")
     ? JSON.parse(localStorage.getItem("cartItems"))
@@ -19,8 +23,6 @@ const intialState = {
     carts: { cart: cartItems },
 };
 
-import cartSliceReducer from "../../components/cart/cartSlice";
-
 export const store = configureStore({
     reducer: {
         products: productReducer,
@@ -28,7 +30,10 @@ export const store = configureStore({
         carts: cartReducer,
         cartSlice: cartSliceReducer,
         auth: authReducer,
-        payment: paymentMethodReducer
+        payment: paymentMethodReducer,
+        admin: adminReducer,
+        order: orderReducer,
+        sellers: sellerReducer,
     },
     preloadedState: intialState,
 });

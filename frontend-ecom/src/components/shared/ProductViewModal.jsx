@@ -46,10 +46,16 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
                                 {image && (
                                     <div className="w-full h-64 sm:h-80 overflow-hidden bg-slate-50 flex items-center justify-center p-4 sm:p-8">
                                         <img
-                                            className='w-full h-full object-contain mix-blend-multiply cursor-pointer transition-transform duration-500 transform hover:scale-110'
-                                            src={image}
-                                            alt={productName}
-                                        />
+    className='w-full h-full object-contain mix-blend-multiply cursor-pointer transition-transform duration-500 transform hover:scale-110'
+    // This uses the 'image' prop directly because 'image' was already cleaned by the Parent (ProductCard)
+    src={image} 
+    alt={productName}
+    onError={(e) => {
+        if (e.target.src !== "/assets/local-placeholder.png") {
+            e.target.src = "/assets/local-placeholder.png";
+        }
+    }}
+/>
                                     </div>
                                 )}
 
