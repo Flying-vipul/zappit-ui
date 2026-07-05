@@ -10,12 +10,15 @@ const ProductCard = ({
   productId,
   productName,
   image,
+  images,
   description,
   quantity,
   price,
   discount,
   specialPrice,
   about,
+  sizes,
+  colors,
 }) => {
   const [openProductViewModal, setOpenProductViewModal] = useState(false);
   const btnLoader = false;
@@ -23,6 +26,8 @@ const ProductCard = ({
   const isAvailable = quantity && Number(quantity) > 0;
   const dispatch = useDispatch();
 
+  // Check if product has variations (clothing)
+  const hasVariations = (sizes && sizes.length > 0) || (colors && colors.length > 0);
 
   // --- FIX: CLOUD-AWARE URL CLEANER ---
 const getCleanImageUrl = (imgData) => {
@@ -42,7 +47,23 @@ const getCleanImageUrl = (imgData) => {
 
 
   const fullImageUrl = getCleanImageUrl(image);
+  const cleanImages = images && images.length > 0 ? images.map(getCleanImageUrl) : [fullImageUrl];
   // -----------------------------------
+
+  const productModalData = {
+    id: productId,
+    productName,
+    image: fullImageUrl,
+    images: cleanImages,
+    description,
+    quantity,
+    price,
+    discount,
+    specialPrice,
+    about: false,
+    sizes,
+    colors,
+  };
 
   const handleProductView = (product) => {
     if (!about) {
@@ -53,8 +74,21 @@ const getCleanImageUrl = (imgData) => {
   }
 
   const addToCartHandler = (cartItems) => {
+    // If product has variations, open the modal instead of adding directly
+    if (hasVariations) {
+      handleProductView(productModalData);
+      return;
+    }
     dispatch(addTocart(cartItems, 1, toast));
   };
+
+  // Extract color swatches from "Name:#HEX" format
+  const colorSwatches = colors && colors.length > 0
+    ? colors.map(c => {
+        const parts = c.split(":");
+        return { name: parts[0], hex: parts[1] || "#ccc" };
+      })
+    : [];
 
   return (
     <div className='group relative border border-gray-200/60 dark:border-gray-700/50 rounded-2xl bg-white dark:bg-gray-900/50 overflow-hidden
@@ -79,18 +113,7 @@ const getCleanImageUrl = (imgData) => {
       )}
 
       {/* IMAGE WRAPPER */}
-      <div onClick={() => {
-        handleProductView({
-          id: productId,
-          productName,
-          image: fullImageUrl,
-          description,
-          quantity,
-          price,
-          discount,
-          specialPrice,
-        })
-      }} className='w-2/5 sm:w-full shrink-0 overflow-hidden aspect-square flex items-center justify-center bg-gradient-to-br from-slate-50 to-white dark:from-gray-800 dark:to-gray-900 p-2 sm:p-6'>
+      <div onClick={() => handleProductView(productModalData)} className='w-2/5 sm:w-full shrink-0 overflow-hidden aspect-square flex items-center justify-center bg-gradient-to-br from-slate-50 to-white dark:from-gray-800 dark:to-gray-900 p-2 sm:p-6'>
 
         <img
           className='w-full h-full object-contain cursor-pointer transition-all duration-700 transform group-hover:scale-110'
@@ -106,22 +129,41 @@ const getCleanImageUrl = (imgData) => {
 
       <div className='w-3/5 sm:w-full p-3 sm:p-5 flex flex-col justify-between grow'>
         <div>
-          <h2 onClick={() => {
-            handleProductView({
-              id: productId,
-              productName,
-              image: fullImageUrl,
-              description,
-              quantity,
-              price,
-              discount,
-              specialPrice,
-              about: false,
-            })
-          }}
+          <h2 onClick={() => handleProductView(productModalData)}
             className='text-base sm:text-lg font-semibold sm:mb-2 cursor-pointer line-clamp-2 sm:line-clamp-none text-slate-800 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200'
           >{productName}
           </h2>
+
+          {/* Color Swatches Row */}
+          {colorSwatches.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2 mt-1">
+              {colorSwatches.slice(0, 5).map((color, idx) => (
+                <span
+                  key={idx}
+                  title={color.name}
+                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white shadow-sm ring-1 ring-slate-200 dark:ring-gray-600 transition-transform hover:scale-125 cursor-pointer"
+                  style={{ backgroundColor: color.hex }}
+                />
+              ))}
+              {colorSwatches.length > 5 && (
+                <span className="text-xs text-slate-400 dark:text-gray-500 font-medium ml-0.5">
+                  +{colorSwatches.length - 5}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Size badges (compact) */}
+          {sizes && sizes.length > 0 && (
+            <div className="hidden sm:flex items-center gap-1 mb-2">
+              {sizes.map((size, idx) => (
+                <span key={idx} className="text-[10px] font-bold text-slate-500 dark:text-gray-400 bg-slate-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                  {size}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className='hidden sm:block min-h-20 max-h-20'>
             <p className='text-gray-500 dark:text-gray-400 text-sm leading-relaxed'>
               {truncateText(description, 45)}
@@ -154,6 +196,8 @@ const getCleanImageUrl = (imgData) => {
               price,
               productId,
               quantity,
+              sizes,
+              colors,
             })}
             className={`${isAvailable
               ? "bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 hover:shadow-lg hover:shadow-indigo-500/30"
@@ -161,7 +205,7 @@ const getCleanImageUrl = (imgData) => {
               }
               text-white font-medium py-2 sm:py-2.5 px-4 sm:px-5 text-sm rounded-xl w-full sm:w-auto flex justify-center items-center transition-all duration-300 active:scale-95`}>
             <FaShoppingCart className='mr-1.5 sm:mr-2' size={14} />
-            {isAvailable ? "Add to Cart" : "Stock Out"}
+            {hasVariations ? "Select Options" : (isAvailable ? "Add to Cart" : "Stock Out")}
           </button>
         </div>
       </div>
@@ -175,4 +219,4 @@ const getCleanImageUrl = (imgData) => {
   )
 }
 
-export default ProductCard;
+export default ProductCard;

@@ -16,7 +16,9 @@ const PaymentMethod = () => {
             const sendCartItems = cart.map((item) => {
                 return {
                     productId : item.productId,
-                    quantity : item.quantity
+                    quantity : item.quantity,
+                    selectedSize: item.selectedSize || null,
+                    selectedColor: item.selectedColor || null,
                 };
             });
             

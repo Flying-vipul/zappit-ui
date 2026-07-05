@@ -110,7 +110,7 @@ const Cart = () => {
                         <div className="flex text-sm gap-2 flex-col bg-slate-50/80 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-100 dark:border-gray-800">
                             <div className="flex justify-between w-full md:text-lg text-sm font-bold dark:text-gray-200 gap-10">
                                 <span>SubTotal</span>
-                                <span className="gradient-text text-xl">${Number(newCart.totalPrice || 0).toFixed(2)}</span>
+                                <span className="gradient-text text-xl">₹{Number(newCart.totalPrice || 0).toFixed(2)}</span>
                             </div>
                             <p className="text-slate-400 dark:text-gray-500 text-xs">
                                 Taxes and shipping calculated at checkout

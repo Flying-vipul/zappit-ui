@@ -57,11 +57,17 @@ export const addTocart = (data, qty = 1, toast) =>
       (item) => item.productId === data.productId
     );
     //Check for stocks
-    const isQuantityExist = getProduct.quantity >= qty;
+    const isQuantityExist = getProduct ? getProduct.quantity >= qty : data.quantity >= qty;
 
     //If in Stock -> add
     if (isQuantityExist) {
-      dispatch({ type: "ADD_CART", payload: { ...data, quantity: qty } });
+      dispatch({ type: "ADD_CART", payload: { 
+        ...data, 
+        quantity: qty,
+        // Include variation fields (will be undefined for non-clothing products)
+        selectedSize: data.selectedSize || null,
+        selectedColor: data.selectedColor || null,
+      }});
       toast.success(`${data?.productName} added to the cart`);
       localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
 
@@ -84,8 +90,12 @@ export const authenticateSignInUser
 
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Internal Server Error");
-
+      const errMsg = error?.response?.data?.message || "Internal Server Error";
+      toast.error(errMsg);
+      if (error?.response?.data?.unverifiedEmail || errMsg.toLowerCase().includes("verify your email")) {
+        const emailToPass = error?.response?.data?.unverifiedEmail || (sendData.username && sendData.username.includes("@") ? sendData.username : "");
+        navigate("/verify-otp", { state: { email: emailToPass } });
+      }
     } finally {
       setLoader(false);
     }
@@ -418,8 +428,29 @@ export const updateProductImageFromDashboard =
         setOpen(false);
         await dispatch(dashboardProductsAction());
     } catch (error) {
-        toast.error(error?.response?.data?.description || "Product Image upload failed");
-     
+        setLoader(false);
+        toast.error(error?.response?.data?.description || error?.response?.data?.message || "Product Image upload failed");
+    }
+};
+
+export const updateProductImagesFromDashboard = 
+    (formData, productId, toast, setLoader, setOpen, isAdmin) => async (dispatch) => {
+    try {
+        setLoader(true);
+        // Admin uses /product/{id}/images, seller uses /seller/products/{id}/images
+        const url = isAdmin ? `/product/${productId}/images` : `/seller/products/${productId}/images`;
+        await api.put(url, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        toast.success("Gallery images upload successful!");
+        setLoader(false);
+        setOpen(false);
+        await dispatch(dashboardProductsAction());
+    } catch (error) {
+        setLoader(false);
+        toast.error(error?.response?.data?.description || error?.response?.data?.message || "Product Images upload failed");
     }
 };
 

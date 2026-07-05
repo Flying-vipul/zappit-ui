@@ -26,8 +26,10 @@ const OrderSummary = ({ totalPrice, cart, address, paymentMethod }) => {
 
   const getCleanImageUrl = (imgData) => {
     if (!imgData) return "/assets/local-placeholder.png";
+    // Pass through Cloudinary / external URLs
+    if (imgData.startsWith("http")) return imgData;
     const filename = imgData.split('/').pop();
-    return `${import.meta.env.VITE_BACK_END_URL}/images/${filename}`;
+    return `${import.meta.env.VITE_BACK_END_URL || 'http://localhost:8080'}/images/${filename}`;
   };
 
 
@@ -76,7 +78,7 @@ const OrderSummary = ({ totalPrice, cart, address, paymentMethod }) => {
               <h2 className='text-2xl font-semibold mb-2'>Order Items</h2>
               <div className='space-y-4'>
                 {cart?.map((item) => (
-                  <div key={item?.productId} className='flex items-start sm:items-center'>
+                  <div key={`${item?.productId}-${item?.selectedSize}-${item?.selectedColor}`} className='flex items-start sm:items-center'>
                     <ProductImage
                       src={getCleanImageUrl(item?.image)}
                       alt={item?.productName || 'Product'}
@@ -84,12 +86,30 @@ const OrderSummary = ({ totalPrice, cart, address, paymentMethod }) => {
                     />
                     <div className='text-gray-600 ml-4 flex-1 min-w-0'>
                       <p className='truncate sm:whitespace-normal sm:line-clamp-2 text-sm sm:text-base font-medium'>{item?.productName}</p>
+                      {/* Variation details */}
+                      {(item?.selectedSize || item?.selectedColor) && (
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          {item?.selectedSize && (
+                            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                              Size: {item.selectedSize}
+                            </span>
+                          )}
+                          {item?.selectedColor && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border border-slate-300"
+                                style={{ backgroundColor: item.selectedColor.split(":")[1] || "#ccc" }}
+                              />
+                              {item.selectedColor.split(":")[0]}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <p>
                         {item?.quantity} x ₹{item?.specialPrice} = ₹{
                           formatPriceCalculation(item?.quantity, item?.specialPrice)
                         }
                       </p>
-
                     </div>
                   </div>
                 ))}

@@ -1,5 +1,6 @@
 import './App.css'
 import Product from './components/products/Product'
+import ProductDetailPage from './components/products/ProductDetailPage';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './components/home/Home';
 import Navbar from './components/shared/Navbar';
@@ -49,6 +50,8 @@ const AppLayout = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/products' element={<Product />} />
+        <Route path='/product/:id' element={<ProductDetailPage />} />
+        <Route path='/products/:id' element={<ProductDetailPage />} />
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />

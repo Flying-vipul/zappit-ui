@@ -33,6 +33,8 @@ const ItemContent = ({
     discount,
     specialPrice,
     cartId,
+    selectedSize,
+    selectedColor,
 }) => {
     const [currentQuantity, setCurrentQuantity] = useState(quantity);
     const dispatch = useDispatch();
@@ -42,14 +44,25 @@ const ItemContent = ({
     const getCleanImageUrl = (imgData) => {
         const BASE = import.meta.env.VITE_BACK_END_URL || "http://localhost:8080";
         if (!imgData) return `${BASE}/images/default.png`;
+        if (imgData.startsWith("http")) return imgData;
         const filename = imgData.split('/').pop();
         return `${BASE}/images/${filename}`;
     };
     const fullImageUrl = getCleanImageUrl(image);
 
+    // Parse color from "Name:#HEX" format
+    const parsedColor = selectedColor
+        ? (() => {
+            const parts = selectedColor.split(":");
+            return { name: parts[0], hex: parts[1] || "#ccc" };
+          })()
+        : null;
+
     const removeFromCartHandler = () => {
-        dispatch({ type: "REMOVE_FROM_CART", payload: productId });
-        const updatedCart = cart.filter((item) => item.productId !== productId);
+        dispatch({ type: "REMOVE_FROM_CART", payload: productId, selectedSize, selectedColor });
+        const updatedCart = cart.filter((item) => 
+            !(item.productId === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor)
+        );
         localStorage.setItem("cartItems", JSON.stringify(updatedCart));
         toast.error(`${productName} removed from cart`);
     };
@@ -62,7 +75,7 @@ const ItemContent = ({
         // Must match Cart.jsx header: md:grid-cols-5, col-span-2 for Product
         <div className="flex flex-col md:grid md:grid-cols-5 gap-4 items-center border-b border-slate-300 py-6 lg:px-4 px-2 hover:bg-slate-50 transition-colors">
 
-            {/* ── Product Info (Image + Name + Remove) ── */}
+            {/* ── Product Info (Image + Name + Variation + Remove) ── */}
             <div className="w-full md:col-span-2 flex justify-start items-center gap-4">
                 <div className="w-24 h-24 shrink-0 bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center shadow-sm">
                     <ProductImage
@@ -75,6 +88,26 @@ const ItemContent = ({
                     <h3 className="text-base sm:text-[17px] font-bold text-slate-800 leading-tight">
                         {productName}
                     </h3>
+
+                    {/* Variation Details (Size & Color) */}
+                    {(selectedSize || parsedColor) && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {selectedSize && (
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+                                    Size: <span className="text-slate-800">{selectedSize}</span>
+                                </span>
+                            )}
+                            {parsedColor && (
+                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+                                    <span
+                                        className="w-3 h-3 rounded-full border border-slate-300 shadow-inner"
+                                        style={{ backgroundColor: parsedColor.hex }}
+                                    />
+                                    {parsedColor.name}
+                                </span>
+                            )}
+                        </div>
+                    )}
 
                     {/* Mobile Only: Show Price inline */}
                     <div className="md:hidden text-sm font-semibold text-slate-600 mt-1">
@@ -103,8 +136,11 @@ const ItemContent = ({
                         onClick={() => {
                             const newQty = Math.max(1, currentQuantity - 1);
                             setCurrentQuantity(newQty);
-                            dispatch({ type: "UPDATE_CART_QUANTITY", payload: { productId, quantity: newQty } });
-                            const updated = cart.map(i => i.productId === productId ? { ...i, quantity: newQty } : i);
+                            dispatch({ type: "UPDATE_CART_QUANTITY", payload: { productId, quantity: newQty, selectedSize, selectedColor } });
+                            const updated = cart.map(i => 
+                                (i.productId === productId && i.selectedSize === selectedSize && i.selectedColor === selectedColor) 
+                                    ? { ...i, quantity: newQty } : i
+                            );
                             localStorage.setItem("cartItems", JSON.stringify(updated));
                         }}
                         className="w-7 h-7 rounded-full text-slate-600 flex items-center justify-center hover:bg-slate-200 text-lg font-bold transition-colors"
@@ -116,8 +152,11 @@ const ItemContent = ({
                         onClick={() => {
                             const newQty = currentQuantity + 1;
                             setCurrentQuantity(newQty);
-                            dispatch({ type: "UPDATE_CART_QUANTITY", payload: { productId, quantity: newQty } });
-                            const updated = cart.map(i => i.productId === productId ? { ...i, quantity: newQty } : i);
+                            dispatch({ type: "UPDATE_CART_QUANTITY", payload: { productId, quantity: newQty, selectedSize, selectedColor } });
+                            const updated = cart.map(i => 
+                                (i.productId === productId && i.selectedSize === selectedSize && i.selectedColor === selectedColor) 
+                                    ? { ...i, quantity: newQty } : i
+                            );
                             localStorage.setItem("cartItems", JSON.stringify(updated));
                         }}
                         className="w-7 h-7 rounded-full text-slate-600 flex items-center justify-center hover:bg-slate-200 text-lg font-bold transition-colors"
@@ -137,4 +176,4 @@ const ItemContent = ({
     );
 };
 
-export default ItemContent;
+export default ItemContent;

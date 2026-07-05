@@ -11,12 +11,20 @@ import Skeleton from '../../shared/Skeleton';
 import ErrorPage from '../../shared/ErrorPage';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 
+const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL"];
+
 const AddProductForm = ({ setOpen, product, update=false}) => {
 const [loader, setLoader] = useState(false);
 const [selectedCategory, setSelectedCategory] = useState();
 const [previewImage, setPreviewImage] = useState(null);
 const [selectedFile, setSelectedFile] = useState(null);
 const fileInputRef = useRef();
+
+// --- Variation State ---
+const [selectedSizes, setSelectedSizes] = useState([]);
+const [productColors, setProductColors] = useState([]); // array of "Name:#HEX"
+const [colorName, setColorName] = useState("");
+const [colorHex, setColorHex] = useState("#6366f1");
 
 const { categories } = useSelector((state) => state.products);
 const { categoryLoader, errorMessage } = useSelector((state) => state.errors);
@@ -33,6 +41,35 @@ const dispatch = useDispatch();
     } = useForm({
         mode: "onTouched"
     });
+
+    // Detect if selected category is "Clothes"
+    const isClothesCategory = selectedCategory?.categoryName?.toLowerCase() === "clothes";
+
+    const toggleSize = (size) => {
+        setSelectedSizes(prev =>
+            prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+        );
+    };
+
+    const addColor = () => {
+        const name = colorName.trim();
+        if (!name) {
+            toast.error("Please enter a color name");
+            return;
+        }
+        const colorEntry = `${name}:${colorHex}`;
+        if (productColors.some(c => c.toLowerCase().startsWith(name.toLowerCase() + ":"))) {
+            toast.error("This color name is already added");
+            return;
+        }
+        setProductColors(prev => [...prev, colorEntry]);
+        setColorName("");
+        setColorHex("#6366f1");
+    };
+
+    const removeColor = (index) => {
+        setProductColors(prev => prev.filter((_, i) => i !== index));
+    };
 
     const onHandleImageChange = (e) => {
         const file = e.target.files[0];
@@ -58,12 +95,21 @@ const dispatch = useDispatch();
 
     const saveProductHandler = (data) => {
         setLoader(true);
-        // We pass a dummy setOpen to the product actions so they don't close the modal preemptively if we still need to upload an image.
         const dummySetOpen = () => {};
+
+        // Build variation data only for Clothes category
+        const variationData = isClothesCategory ? {
+            sizes: selectedSizes,
+            colors: productColors,
+        } : {
+            sizes: [],
+            colors: [],
+        };
 
         if (!update) {
             const sendData = {
                 ...data,
+                ...variationData,
                 categoryId: selectedCategory.categoryId,
             };
             dispatch(addNewProductFromDashboard(sendData, toast, reset, setLoader, dummySetOpen, isAdmin))
@@ -73,12 +119,13 @@ const dispatch = useDispatch();
                         formData.append("image", selectedFile);
                         dispatch(updateProductImageFromDashboard(formData, newProduct.productId, toast, setLoader, setOpen, isAdmin));
                     } else {
-                        setOpen(false); // Close it manually if no image
+                        setOpen(false);
                     }
                 }).catch(() => setLoader(false));
         } else {
             const sendData = {
                 ...data,
+                ...variationData,
                 id: product.id,
             };
             dispatch(updateProductFromDashboard(sendData, toast, reset, setLoader, dummySetOpen, isAdmin))
@@ -88,7 +135,7 @@ const dispatch = useDispatch();
                         formData.append("image", selectedFile);
                         dispatch(updateProductImageFromDashboard(formData, product.id, toast, setLoader, setOpen, isAdmin));
                     } else {
-                        setOpen(false); // Close it manually if no image
+                        setOpen(false);
                     }
                 }).catch(() => setLoader(false));
         }
@@ -103,6 +150,13 @@ const dispatch = useDispatch();
             setValue("discount", product?.discount);
             setValue("specialPrice", product?.specialPrice);
             setValue("description", product?.description);
+            // Pre-populate variations for clothing products
+            if (product?.sizes && Array.isArray(product.sizes)) {
+                setSelectedSizes(product.sizes);
+            }
+            if (product?.colors && Array.isArray(product.colors)) {
+                setProductColors(product.colors);
+            }
         }
     }, [update, product]);
 
@@ -217,6 +271,117 @@ const dispatch = useDispatch();
                 )}
         </div>
 
+        {/* ===== PRODUCT VARIATIONS (Clothes Category Only) ===== */}
+        {isClothesCategory && (
+            <div className="space-y-5 p-5 rounded-xl border-2 border-dashed border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-violet-50/50"
+                 style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">👕</span>
+                    <h3 className="text-base font-bold text-indigo-800">
+                        Clothing Variations
+                    </h3>
+                    <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-medium">
+                        Clothes Category
+                    </span>
+                </div>
+
+                {/* SIZE SELECTION */}
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2.5">
+                        Available Sizes
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {AVAILABLE_SIZES.map(size => (
+                            <button
+                                key={size}
+                                type="button"
+                                onClick={() => toggleSize(size)}
+                                className={`
+                                    w-12 h-12 rounded-xl text-sm font-bold transition-all duration-200 border-2
+                                    ${selectedSizes.includes(size) 
+                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/30 scale-105" 
+                                        : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50"}
+                                `}
+                            >
+                                {size}
+                            </button>
+                        ))}
+                    </div>
+                    {selectedSizes.length > 0 && (
+                        <p className="text-xs text-indigo-600 mt-2 font-medium">
+                            ✓ Selected: {selectedSizes.join(", ")}
+                        </p>
+                    )}
+                </div>
+
+                {/* COLOR SELECTION */}
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2.5">
+                        Available Colors
+                    </label>
+                    <div className="flex flex-wrap items-end gap-3">
+                        <div className="flex-1 min-w-[140px]">
+                            <label className="block text-xs text-slate-500 mb-1">Color Name</label>
+                            <input
+                                type="text"
+                                value={colorName}
+                                onChange={(e) => setColorName(e.target.value)}
+                                placeholder="e.g. Royal Blue"
+                                className="px-3 py-2.5 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all bg-white"
+                            />
+                        </div>
+                        <div className="shrink-0">
+                            <label className="block text-xs text-slate-500 mb-1">Pick Color</label>
+                            <div className="relative">
+                                <input
+                                    type="color"
+                                    value={colorHex}
+                                    onChange={(e) => setColorHex(e.target.value)}
+                                    className="w-12 h-[42px] rounded-lg border-2 border-slate-200 cursor-pointer hover:border-indigo-400 transition-colors"
+                                    style={{ padding: '2px' }}
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={addColor}
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 whitespace-nowrap"
+                        >
+                            + Add
+                        </button>
+                    </div>
+
+                    {/* COLOR CHIPS */}
+                    {productColors.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {productColors.map((colorEntry, idx) => {
+                                const [name, hex] = colorEntry.split(":");
+                                return (
+                                    <span
+                                        key={idx}
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-shadow group"
+                                    >
+                                        <span
+                                            className="w-4 h-4 rounded-full border border-slate-300 shadow-inner"
+                                            style={{ backgroundColor: hex }}
+                                        />
+                                        {name}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeColor(idx)}
+                                            className="ml-0.5 text-slate-400 hover:text-rose-500 transition-colors text-base leading-none font-bold"
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+
         {/* INTEGRATED IMAGE UPLOAD SECTION */}
         <div className='flex flex-col gap-4 w-full pt-2'>
             <label className='flex items-center gap-2 cursor-pointer text-slate-600 bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 hover:border-slate-400 transition-colors rounded-md p-4 w-full justify-center shadow-sm'>
@@ -274,4 +439,4 @@ const dispatch = useDispatch();
   )
 }
 
-export default AddProductForm
+export default AddProductForm

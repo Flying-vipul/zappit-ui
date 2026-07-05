@@ -102,12 +102,20 @@ const OrderDetail = () => {
             Items Ordered
           </Typography>
           <div className="flex flex-col gap-4 mt-4">
-            {order.orderItems?.map((item) => (
+            {order.orderItems?.map((item) => {
+              // Handle both field names: entity sends 'orderedProductPrice', DTO sends 'orderProductPrice'
+              const itemPrice = item.orderedProductPrice ?? item.orderProductPrice ?? item.product?.specialPrice ?? 0;
+              // Cloud-aware image URL
+              const imgUrl = item.product?.image
+                ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_BACK_END_URL || 'http://localhost:8080'}/images/${item.product.image}`)
+                : '/assets/local-placeholder.png';
+              return (
               <div key={item.orderItemId} className="flex gap-4 items-center border p-4 rounded-lg bg-slate-50">
                 <img 
-                  src={item.product?.image || '/placeholder-image.png'} 
+                  src={imgUrl} 
                   alt={item.product?.productName} 
                   className="w-20 h-20 object-cover rounded-md border"
+                  onError={(e) => { if (e.target.src !== '/assets/local-placeholder.png') e.target.src = '/assets/local-placeholder.png'; }}
                 />
                 <div className="flex-1">
                   <Typography variant="subtitle1" fontWeight="bold" className="text-slate-800">
@@ -116,12 +124,27 @@ const OrderDetail = () => {
                   <Typography variant="body2" color="text.secondary">
                     Quantity: {item.quantity}
                   </Typography>
+                  {/* Show variation details if present */}
+                  {(item.selectedSize || item.selectedColor) && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {item.selectedSize && (
+                        <span className="text-[11px] font-semibold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">Size: {item.selectedSize}</span>
+                      )}
+                      {item.selectedColor && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">
+                          <span className="w-2.5 h-2.5 rounded-full border border-slate-400" style={{ backgroundColor: item.selectedColor.split(':')[1] || '#ccc' }} />
+                          {item.selectedColor.split(':')[0]}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <Typography variant="subtitle1" fontWeight="bold" className="text-blue-600">
-                  ₹{(item.orderedProductPrice * item.quantity).toFixed(2)}
+                  ₹{(Number(itemPrice) * Number(item.quantity)).toFixed(2)}
                 </Typography>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -149,7 +172,7 @@ const OrderDetail = () => {
             
             <div className="flex justify-between items-center">
               <Typography variant="h6" fontWeight="bold" className="text-slate-800">Total:</Typography>
-              <Typography variant="h5" fontWeight="bold" className="text-blue-600">₹{order.totalAmount.toFixed(2)}</Typography>
+              <Typography variant="h5" fontWeight="bold" className="text-blue-600">₹{Number(order.totalAmount || 0).toFixed(2)}</Typography>
             </div>
           </div>
         </div>
