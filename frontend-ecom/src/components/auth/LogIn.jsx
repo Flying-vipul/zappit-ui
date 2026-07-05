@@ -104,6 +104,13 @@ const LogIn = () => {
                         <span>Sign Up</span></Link>
                 </p>
 
+                <p className="text-center text-xs text-slate-400 dark:text-gray-500 mt-2">
+                    Need to verify your email or resend OTP?{" "}
+                    <Link className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+                        to="/verify-otp">
+                        <span>Verify Account</span></Link>
+                </p>
+
             </form>
         </div>
     );
