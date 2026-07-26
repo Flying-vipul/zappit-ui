@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-    FaFacebookF, FaTwitter, FaInstagram, FaYoutube,
-    FaShoppingBag, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaBolt,
+    FaInstagram, FaYoutube,
+    FaShoppingBag, FaMapMarkerAlt, FaEnvelope, FaBolt,
 } from "react-icons/fa";
 
 const Footer = () => {
@@ -21,7 +21,7 @@ const Footer = () => {
                 <div className="relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 py-4 px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-white font-semibold text-base">
                         <FaShoppingBag size={18} />
-                        <span>Free shipping on orders over <strong>$50</strong></span>
+                        <span>Premium quality steel household products — <strong>direct from manufacturer</strong></span>
                     </div>
                     <Link
                         to="/products"
@@ -46,19 +46,21 @@ const Footer = () => {
                         </span>
                     </Link>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                        Your premium destination for the latest products at unbeatable prices. Quality you can trust, delivered fast.
+                        Your trusted destination for premium stainless steel household products.
+                        ISI-certified quality, direct factory pricing, built to last decades.
                     </p>
                     {/* Social icons */}
                     <div className="flex gap-3 pt-2">
                         {[
-                            { icon: <FaFacebookF size={14} />, href: "#" },
-                            { icon: <FaTwitter size={14} />, href: "#" },
-                            { icon: <FaInstagram size={14} />, href: "#" },
-                            { icon: <FaYoutube size={14} />, href: "#" },
-                        ].map(({ icon, href }, i) => (
+                            { icon: <FaInstagram size={14} />, href: "https://www.instagram.com", label: "Instagram" },
+                            { icon: <FaYoutube size={14} />, href: "https://www.youtube.com", label: "YouTube" },
+                        ].map(({ icon, href, label }) => (
                             <a
-                                key={i}
+                                key={label}
                                 href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={label}
                                 className="w-9 h-9 rounded-xl bg-white/5 hover:bg-indigo-500 border border-white/10 hover:border-indigo-400
                                     flex items-center justify-center text-slate-400 hover:text-white
                                     transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/20"
@@ -78,7 +80,7 @@ const Footer = () => {
                             { label: "Products", to: "/products" },
                             { label: "About Us", to: "/about" },
                             { label: "Contact", to: "/contact" },
-                            { label: "Cart", to: "/cart" },
+                            { label: "My Orders", to: "/profile/orders" },
                         ].map(({ label, to }) => (
                             <li key={label}>
                                 <Link
@@ -93,23 +95,24 @@ const Footer = () => {
                     </ul>
                 </div>
 
-                {/* Customer Service */}
+                {/* Legal & Policies */}
                 <div>
-                    <h3 className="text-white font-semibold mb-5 uppercase tracking-widest text-xs">Customer Service</h3>
+                    <h3 className="text-white font-semibold mb-5 uppercase tracking-widest text-xs">Legal & Policies</h3>
                     <ul className="space-y-3 text-sm">
                         {[
-                            "FAQ",
-                            "Shipping & Returns",
-                            "Order Tracking",
-                            "Size Guide",
-                            "Privacy Policy",
-                            "Terms & Conditions",
-                        ].map((item) => (
-                            <li key={item}>
-                                <a href="#" className="text-slate-400 hover:text-indigo-400 hover:pl-2 transition-all duration-300 flex items-center gap-2 group">
+                            { label: "Privacy Policy", to: "/privacy-policy" },
+                            { label: "Terms & Conditions", to: "/terms" },
+                            { label: "Refund & Cancellation", to: "/terms#refund" },
+                            { label: "Shipping Policy", to: "/terms#shipping" },
+                        ].map(({ label, to }) => (
+                            <li key={label}>
+                                <Link
+                                    to={to}
+                                    className="text-slate-400 hover:text-indigo-400 hover:pl-2 transition-all duration-300 flex items-center gap-2 group"
+                                >
                                     <span className="w-1.5 h-1.5 rounded-full bg-violet-500/50 group-hover:bg-violet-400 transition-colors duration-300" />
-                                    {item}
-                                </a>
+                                    {label}
+                                </Link>
                             </li>
                         ))}
                     </ul>
@@ -123,35 +126,38 @@ const Footer = () => {
                             <div className="w-8 h-8 shrink-0 rounded-lg bg-indigo-500/10 flex items-center justify-center mt-0.5">
                                 <FaMapMarkerAlt className="text-indigo-400" size={14} />
                             </div>
-                            <span>123 Commerce Street,<br />New York, NY 10001, USA</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <div className="w-8 h-8 shrink-0 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                                <FaPhoneAlt className="text-indigo-400" size={13} />
-                            </div>
-                            <a href="tel:+11234567890" className="hover:text-indigo-400 transition duration-200">+1 (123) 456-7890</a>
+                            <a
+                                href="https://maps.google.com/?q=18.6635269,73.7948105"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-indigo-400 transition duration-200"
+                            >
+                                Om Steel, Chikhali Akurdi Rd,<br />
+                                Pimpri-Chinchwad, MH 411019
+                            </a>
                         </li>
                         <li className="flex items-center gap-3">
                             <div className="w-8 h-8 shrink-0 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                                 <FaEnvelope className="text-indigo-400" size={13} />
                             </div>
-                            <a href="mailto:support@zappit.com" className="hover:text-indigo-400 transition duration-200">support@zappit.com</a>
+                            <a href="mailto:zappit.india@gmail.com" className="hover:text-indigo-400 transition duration-200">
+                                zappit.india@gmail.com
+                            </a>
                         </li>
                     </ul>
 
-                    {/* Newsletter */}
+                    {/* Payment badges */}
                     <div className="mt-7">
-                        <p className="text-xs text-slate-400 mb-3 uppercase tracking-wide font-semibold">Newsletter</p>
-                        <div className="flex">
-                            <input
-                                type="email"
-                                placeholder="your@email.com"
-                                className="flex-1 bg-white/5 border border-white/10 text-sm text-white placeholder-slate-500 px-4 py-2.5 rounded-l-xl
-                                    focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-400 transition-all duration-300"
-                            />
-                            <button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white text-sm px-5 py-2.5 rounded-r-xl transition-all duration-300 font-semibold">
-                                Go
-                            </button>
+                        <p className="text-xs text-slate-400 mb-3 uppercase tracking-wide font-semibold">Secure Payments</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {["Razorpay", "UPI", "Visa", "Mastercard", "NetBanking"].map((p) => (
+                                <span
+                                    key={p}
+                                    className="text-xs bg-white/5 border border-white/10 text-slate-400 px-3 py-1 rounded-lg font-medium"
+                                >
+                                    {p}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -159,11 +165,10 @@ const Footer = () => {
 
             {/* ── Bottom Bar ── */}
             <div className="relative border-t border-white/5 py-5 px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-                <span>© {new Date().getFullYear()} Zappit. All rights reserved.</span>
+                <span>© {new Date().getFullYear()} Zappit / Om Steel. All rights reserved.</span>
                 <div className="flex gap-4">
-                    <a href="#" className="hover:text-indigo-400 transition-colors duration-200">Privacy Policy</a>
-                    <a href="#" className="hover:text-indigo-400 transition-colors duration-200">Terms of Use</a>
-                    <a href="#" className="hover:text-indigo-400 transition-colors duration-200">Sitemap</a>
+                    <Link to="/privacy-policy" className="hover:text-indigo-400 transition-colors duration-200">Privacy Policy</Link>
+                    <Link to="/terms" className="hover:text-indigo-400 transition-colors duration-200">Terms & Conditions</Link>
                 </div>
             </div>
 

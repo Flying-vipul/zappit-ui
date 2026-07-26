@@ -14,6 +14,8 @@ import ScrollToTop from './components/shared/ScrollToTop';
 import LogIn from './components/auth/Login';
 import Register from './components/auth/Register';
 import VerifyOtp from './components/auth/VerifyOtp';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 import PrivateRoute from './components/PrivateRoute';
 import Checkout from './components/checkout/Checkout';
 import PaymentSuccess from './components/checkout/PaymentSuccess';
@@ -21,6 +23,8 @@ import AdminLayout from './components/admin/AdminLayout';
 import MyOrders from './components/orders/MyOrders';
 import OrderDetail from './components/orders/OrderDetail';
 import MyProfile from './components/user/MyProfile';
+import TermsAndConditions from './components/TermsAndConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import { Navigate } from 'react-router-dom';
 import Dashboard from './components/admin/dashboard/Dashboard';
 import AdminProducts from './components/admin/products/AdminProducts';
@@ -28,6 +32,7 @@ import Sellers from './components/admin/sellers/Sellers';
 import Category from './components/admin/categories/Category';
 import Order from './components/admin/orders/Orders';
 import SessionTimeoutModal from './components/auth/SessionTimeoutModal';
+import OAuth2Callback from './components/auth/OAuth2Callback';
 import { useDispatch } from 'react-redux';
 
 const AppLayout = () => {
@@ -55,6 +60,8 @@ const AppLayout = () => {
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />
+        <Route path='/terms' element={<TermsAndConditions />} />
+        <Route path='/privacy-policy' element={<PrivacyPolicy />} />
 
         <Route path='/' element={<PrivateRoute />} >
           <Route path='/checkout' element={<Checkout />} />
@@ -71,7 +78,12 @@ const AppLayout = () => {
           <Route path='/login' element={<LogIn />} />
           <Route path='/register' element={<Register />} />
           <Route path='/verify-otp' element={<VerifyOtp />} />
+          <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/reset-password' element={<ResetPassword />} />
         </Route>
+
+        {/* OAuth2 callback — must be outside PrivateRoute so Google can redirect here */}
+        <Route path='/oauth2/callback' element={<OAuth2Callback />} />
 
         <Route path='/' element={<PrivateRoute adminOnly />} >
           <Route path='/admin' element={<AdminLayout />} >
@@ -83,7 +95,7 @@ const AppLayout = () => {
           </Route>
         </Route>
       </Routes>
-      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/profile') && <Footer />}
+      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/product') && <Footer />}
     </>
   );
 };

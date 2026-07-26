@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -7,6 +7,8 @@ import InputField from '../shared/InputField';
 import toast from 'react-hot-toast';
 import { MdOutlineMailOutline } from 'react-icons/md';
 import api from '../../api/api';
+
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const VerifyOtp = () => {
     const navigate = useNavigate();
@@ -18,6 +20,26 @@ const VerifyOtp = () => {
     const [userEmail, setUserEmail] = useState(initialEmail);
     const [loader, setLoader] = useState(false);
     const [resendLoader, setResendLoader] = useState(false);
+    const [cooldown, setCooldown] = useState(0);
+    const cooldownRef = useRef(null);
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+    }, []);
+
+    const startCooldown = () => {
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        cooldownRef.current = setInterval(() => {
+            setCooldown(prev => {
+                if (prev <= 1) {
+                    clearInterval(cooldownRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    };
 
     const {
         register,
@@ -46,12 +68,30 @@ const VerifyOtp = () => {
             toast.error("Please enter your email address to resend OTP.");
             return;
         }
+        if (cooldown > 0) return;
+
         setResendLoader(true);
         try {
             const { data } = await api.post("/auth/resend-otp", { email: userEmail.trim() });
             toast.success(data.message || "A new OTP has been sent to your email!");
+            startCooldown();
         } catch (error) {
-            toast.error(error?.response?.data?.message || "Failed to resend OTP.");
+            const status = error?.response?.status;
+            const errMsg = error?.response?.data?.message || "Failed to resend OTP.";
+
+            if (status === 400) {
+                // Business logic error (already verified, not found, locked)
+                toast.error(errMsg);
+                if (errMsg.toLowerCase().includes("already verified")) {
+                    setTimeout(() => navigate("/login"), 2000);
+                }
+            } else if (status === 500) {
+                // SMTP / server failure — OTP was saved, email didn't send
+                toast.error("Email delivery failed. Please wait and try again. The server error: " + errMsg);
+                startCooldown(); // Still apply cooldown so they don't hammer the server
+            } else {
+                toast.error(errMsg);
+            }
         } finally {
             setResendLoader(false);
         }
@@ -115,11 +155,16 @@ const VerifyOtp = () => {
                     </p>
                     <button
                         type="button"
-                        disabled={resendLoader}
+                        disabled={resendLoader || cooldown > 0}
                         onClick={handleResendOtp}
-                        className="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline disabled:opacity-50"
+                        className="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                     >
-                        {resendLoader ? "Sending new code..." : "Resend Verification Code"}
+                        {resendLoader
+                            ? "Sending new code..."
+                            : cooldown > 0
+                                ? `Resend available in ${cooldown}s`
+                                : "Resend Verification Code"
+                        }
                     </button>
                 </div>
             </form>

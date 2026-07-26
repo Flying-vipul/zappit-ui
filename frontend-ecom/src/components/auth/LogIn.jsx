@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { FaBolt } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import InputField from "../shared/InputField";
 import { useDispatch } from "react-redux";
 import { authenticateSignInUser } from "../../store/actions";
@@ -53,13 +54,37 @@ const LogIn = () => {
                 </div>
 
                 <div className="flex flex-col gap-4">
+
+                    {/* ── Google OAuth2 Button ── */}
+                    <a
+                        href={`${import.meta.env.VITE_BACK_END_URL || 'https://demo-deployment-xwwp.onrender.com'}/oauth2/authorization/google`}
+                        className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl
+                            border border-gray-200 dark:border-gray-700
+                            bg-white dark:bg-gray-800
+                            text-gray-700 dark:text-gray-200 font-semibold text-sm
+                            hover:bg-gray-50 dark:hover:bg-gray-700
+                            hover:border-gray-300 dark:hover:border-gray-600
+                            hover:shadow-md transition-all duration-200
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    >
+                        <FcGoogle className="text-xl flex-shrink-0" />
+                        Continue with Google
+                    </a>
+
+                    {/* ── Divider ── */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                        <span className="text-xs text-slate-400 dark:text-gray-500 font-medium">or sign in with</span>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                    </div>
+
                     <InputField
-                        label="UserName"
+                        label="Username or Email"
                         required
                         id="username"
                         type="text"
-                        message="*UserName is required"
-                        placeholder="Enter your username"
+                        message="*Username or Email is required"
+                        placeholder="Enter your username or email"
                         register={register}
                         errors={errors}
                     />
@@ -76,9 +101,18 @@ const LogIn = () => {
                     />
                 </div>
 
+                <div className="flex justify-end mt-1">
+                    <Link
+                        to="/forgot-password"
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:underline font-bold"
+                    >
+                        Forgot Password?
+                    </Link>
+                </div>
+
                 <button
                     disabled={loader}
-                    className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500
+                    className="w-full mt-6 py-3 rounded-xl bg-linear-to-r from-indigo-500 to-violet-500
                         text-white font-semibold shadow-lg shadow-indigo-500/30
                         hover:from-indigo-600 hover:to-violet-600 hover:shadow-xl hover:shadow-indigo-500/40
                         transition-all duration-300 hover:-translate-y-0.5

@@ -5,7 +5,8 @@ import { FaCamera, FaEnvelope, FaShoppingBag, FaUserCog } from 'react-icons/fa';
 import { updateUserProfileImage } from '../../store/actions';
 import toast from 'react-hot-toast';
 import Spinners from '../shared/Spinners';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaLock } from 'react-icons/fa';
 
 const MyProfile = () => {
     const { user } = useSelector((state) => state.auth);
@@ -133,11 +134,13 @@ const MyProfile = () => {
                             </div>
                         </div>
                         <div className="mt-4 border-t pt-4">
-                            {/* Informational placeholder for now */}
-                            <button className="text-purple-600 hover:text-purple-800 font-semibold w-full block text-center bg-purple-50 py-2 rounded-lg transition-colors" opacity="0.6">
-                                Update Password (Coming Soon)
-                            </button>
-                        </div>
+                             <Link
+                                 to="/forgot-password"
+                                 className="flex items-center justify-center gap-2 text-purple-600 hover:text-purple-800 font-semibold w-full text-center bg-purple-50 hover:bg-purple-100 py-2 rounded-lg transition-colors"
+                             >
+                                 <FaLock size={13} /> Reset Password
+                             </Link>
+                         </div>
                     </div>
                 </div>
 
